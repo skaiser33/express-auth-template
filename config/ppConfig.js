@@ -44,9 +44,11 @@ passport.use(new LocalStrategy({
   usernameField: 'email',
   passwordField: 'password'
 }, (email, password, cb) => {
+  //see if user exists
   db.user.findOne({ 
     where: { email }
   }).then(user => {
+    //if there's a found user and that user's password matches the hashed pw stored in the db using validPassword we defined in our user model
     if (!user || !user.validPassword(password)) {
       cb(null, false);
     } else {

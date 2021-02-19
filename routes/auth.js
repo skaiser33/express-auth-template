@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('../config/ppConfig')
 const db = require('../models');
 
 router.get('/signup', (req, res) => {
@@ -7,32 +8,42 @@ router.get('/signup', (req, res) => {
 });
 
 router.post('/signup', (req, res) => {
-  // find or create a user, providing the name and password as default values
   db.user.findOrCreate({
-    where: { email: req.body.email },
-    defaults: {
+    where: {
+      email: req.body.email
+    }, defaults: {
       name: req.body.name,
       password: req.body.password
     }
   }).then(([user, created]) => {
     if (created) {
-      // if created, success and redirect home
-      console.log(`${user.name} was created!`);
-      res.redirect('/');
+      console.log('user created');
+      passport.authenticate('local', {
+        successRedirect: '/',
+      })(req, res); //this odd syntax is an immediately invoked function
     } else {
-      // if not created, the email already exists
-      console.log('Email already exists');
+      console.log('email already exists');
       res.redirect('/auth/signup');
     }
-  }).catch(error => {
-    // if an error occurs, let's see what the error is
-    console.log('An error occurred: ', error.message);
+  }).catch(err => {
+    console.log('💩 Error occured finding or creating user');
+    console.log(err);
     res.redirect('/auth/signup');
   });
 });
 
 router.get('/login', (req, res) => {
   res.render('auth/login');
+});
+
+router.post('/login', passport.authenticate('local', {
+  successRedirect: '/',
+  failureRedirect: '/auth/login'
+}));
+
+router.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
 });
 
 module.exports = router;
