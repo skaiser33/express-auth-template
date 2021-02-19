@@ -9,25 +9,26 @@ router.get('/signup', (req, res) => {
 
 router.post('/signup', (req, res) => {
   db.user.findOrCreate({
-    where: {
-      email: req.body.email
-    }, defaults: {
+    where: { email: req.body.email },
+    defaults: {
       name: req.body.name,
       password: req.body.password
     }
   }).then(([user, created]) => {
     if (created) {
-      console.log('user created');
+      // FLASH
       passport.authenticate('local', {
         successRedirect: '/',
-      })(req, res); //this odd syntax is an immediately invoked function
+        successFlash: 'Account created and logged in'
+      })(req, res);
     } else {
-      console.log('email already exists');
+      // FLASH
+      req.flash('error', 'Email already exists');
       res.redirect('/auth/signup');
     }
-  }).catch(err => {
-    console.log('💩 Error occured finding or creating user');
-    console.log(err);
+  }).catch(error => {
+    // FLASH
+    req.flash('error', error.message);
     res.redirect('/auth/signup');
   });
 });
@@ -36,13 +37,18 @@ router.get('/login', (req, res) => {
   res.render('auth/login');
 });
 
+// FLASH
 router.post('/login', passport.authenticate('local', {
   successRedirect: '/',
-  failureRedirect: '/auth/login'
+  failureRedirect: '/auth/login',
+  failureFlash: 'Invalid username and/or password',
+  successFlash: 'You have logged in!'
 }));
 
 router.get('/logout', (req, res) => {
   req.logout();
+  // FLASH
+  req.flash('success', 'You have logged out');
   res.redirect('/');
 });
 

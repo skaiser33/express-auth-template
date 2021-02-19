@@ -3,6 +3,8 @@ const express = require('express');
 const layouts = require('express-ejs-layouts');
 const session = require('express-session');
 const passport = require('./config/ppConfig');
+const flash = require('connect-flash');
+const isLoggedIn = require('./middleware/isLoggedIn');
 
 const app = express();
 
@@ -25,13 +27,22 @@ app.use(session({
 // initialize the passport configuration & session as middleware BELOW your session configuration. This ensures that Passport is aware that the session module exists.
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash()); //must go after session middleware; adds a method to request object for universal access
 
+//Set up local variables (data that's accessible from anywhere in the app)
+app.use((req, res, next) => {
+  // before every route, attach the flash messages and current user to res.locals
+  res.locals.alerts = req.flash();
+  res.locals.currentUser = req.user;
+  next();
+});
 
 app.get('/', (req, res) => {
   res.render('index');
 });
 
-app.get('/profile', (req, res) => {
+// we use the middleware in the middle of our route to the profile (or any other page we want to restrict)
+app.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
 
