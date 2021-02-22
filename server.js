@@ -27,6 +27,8 @@ app.use(session({
 // initialize the passport configuration & session as middleware BELOW your session configuration. This ensures that Passport is aware that the session module exists.
 app.use(passport.initialize());
 app.use(passport.session());
+
+//FLASH
 app.use(flash()); //must go after session middleware; adds a method to request object for universal access
 
 //Set up local variables (data that's accessible from anywhere in the app)

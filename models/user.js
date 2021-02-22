@@ -55,17 +55,16 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'user',
-  });
+});
 
   //HOOKS - moments in time where we can trigger specific functionality
-  user.beforeCreate((pendingUser, options) => {
-      if (pendingUser && pendingUser.password) {
-        // hash the password
-        let hash = bcrypt.hashSync(pendingUser.password, 12);
-        // store the hash as the user's password in the db
-        pendingUser.password = hash;
-      }
-    })
-
+user.beforeCreate((pendingUser, options) => {
+    if (pendingUser && pendingUser.password) {
+      // hash the password
+      let hash = bcrypt.hashSync(pendingUser.password, 12);
+      // store the hash as the user's password in the db
+      pendingUser.password = hash;
+    }
+  })
   return user;
 };
